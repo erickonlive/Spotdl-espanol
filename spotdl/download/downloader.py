@@ -139,7 +139,7 @@ class Downloader:
         if self.ffmpeg == "ffmpeg" and shutil.which("ffmpeg") is None:
             ffmpeg_exec = get_ffmpeg_path()
             if ffmpeg_exec is None:
-                raise DownloaderError("ffmpeg is not installed")
+                raise DownloaderError("ffmpeg No esta instalado")
 
             self.ffmpeg = str(ffmpeg_exec.absolute())
 
@@ -163,9 +163,9 @@ class Downloader:
         self.scan_formats = self.settings["detect_formats"] or [self.settings["format"]]
         self.known_songs: Dict[str, List[Path]] = {}
         if self.settings["scan_for_songs"]:
-            logger.info("Scanning for known songs, this might take a while...")
+            logger.info("Buscando caciones...")
             for scan_format in self.scan_formats:
-                logger.debug("Scanning for %s files", scan_format)
+                logger.debug("Buscando archivos %s", scan_format)
 
                 found_files = gather_known_songs(self.settings["output"], scan_format)
 
@@ -176,7 +176,7 @@ class Downloader:
                     else:
                         self.known_songs[song_url].extend(song_paths)
 
-        logger.debug("Found %s known songs", len(self.known_songs))
+        logger.debug("Se encontro %s canciones", len(self.known_songs))
 
         # Initialize lyrics providers
         self.lyrics_providers: List[LyricsProvider] = []
@@ -260,7 +260,7 @@ class Downloader:
 
             songs = list(return_obj.values())
 
-        logger.debug("Downloading %d songs", len(songs))
+        logger.debug("Descargando %d canciones", len(songs))
 
         if self.settings["archive"]:
             songs = [song for song in songs if song.url not in self.url_archive]
@@ -468,7 +468,7 @@ class Downloader:
 
             if dup_song_paths:
                 logger.debug(
-                    "Found duplicate songs for %s at %s",
+                    "Canciones duplicadas en %s de %s",
                     song.display_name,
                     dup_song_paths,
                 )
@@ -477,7 +477,7 @@ class Downloader:
             # we can skip the download
             if file_exists and self.settings["overwrite"] == "skip":
                 logger.info(
-                    "Skipping %s (file already exists) %s",
+                    "Omitiendo %s (Ya existe el archivo) %s",
                     song.display_name,
                     "(duplicate)" if dup_song_paths else "",
                 )
@@ -510,7 +510,7 @@ class Downloader:
             # Don't skip if the file exists and overwrite is set to force
             if file_exists and self.settings["overwrite"] == "force":
                 logger.info(
-                    "Overwriting %s %s",
+                    "Sobrescribiendo %s %s",
                     song.display_name,
                     " (duplicate)" if dup_song_paths else "",
                 )
@@ -616,7 +616,7 @@ class Downloader:
                     yt_dlp_args=self.settings["yt_dlp_args"],
                 )
 
-            logger.debug("Downloading %s using %s", song.display_name, download_url)
+            logger.debug("Descargando %s usando %s", song.display_name, download_url)
 
             # Add progress hook to the audio provider
             audio_downloader.audio_handler.add_progress_hook(
@@ -779,7 +779,7 @@ class Downloader:
             # Add the song to the known songs
             self.known_songs.get(song.url, []).append(output_file)
 
-            logger.info('Downloaded "%s": %s', song.display_name, song.download_url)
+            logger.info('Descargado "%s": %s', song.display_name, song.download_url)
 
             return song, output_file
         except (Exception, UnicodeEncodeError) as exception:

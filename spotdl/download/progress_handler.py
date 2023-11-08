@@ -195,7 +195,7 @@ class ProgressHandler:
                     description="Total",
                     message=(
                         f"{self.overall_completed_tasks}/{int(self.overall_total / 100)} "
-                        "complete"
+                        "completado"
                     ),
                     total=self.overall_total,
                     visible=(not self.quiet),
@@ -213,13 +213,13 @@ class ProgressHandler:
                     self.overall_task_id,
                     message=f"{self.overall_completed_tasks}/"
                     f"{int(self.overall_total / 100)} "
-                    "complete",
+                    "completado",
                     completed=self.overall_progress,
                 )
         else:
             if self.previous_overall != self.overall_completed_tasks:
                 logger.info(
-                    "%s/%s complete", self.overall_completed_tasks, self.song_count
+                    "%s/%s completado", self.overall_completed_tasks, self.song_count
                 )
                 self.previous_overall = self.overall_completed_tasks
 
@@ -278,7 +278,7 @@ class SongTracker:
         if not self.parent.simple_tui:
             self.task_id = self.parent.rich_progress_bar.add_task(
                 description=escape(self.song_name),
-                message="Download Started",
+                message="Descarga iniciada",
                 total=100,
                 completed=self.progress,
                 start=False,
@@ -359,7 +359,7 @@ class SongTracker:
         else:
             logger.error("%s: %s", traceback.__class__.__name__, traceback)
 
-    def notify_download_complete(self, status="Converting") -> None:
+    def notify_download_complete(self, status="Convirtiendo") -> None:
         """
         Notifies the progress handler that the song has been downloaded.
 
@@ -370,7 +370,7 @@ class SongTracker:
         self.progress = 50
         self.update(status)
 
-    def notify_conversion_complete(self, status="Embedding metadata") -> None:
+    def notify_conversion_complete(self, status="Aplicando metadata") -> None:
         """
         Notifies the progress handler that the song has been converted.
 
@@ -381,7 +381,7 @@ class SongTracker:
         self.progress = 95
         self.update(status)
 
-    def notify_complete(self, status="Done") -> None:
+    def notify_complete(self, status="Hecho") -> None:
         """
         Notifies the progress handler that the song has been downloaded and converted.
 
@@ -392,7 +392,7 @@ class SongTracker:
         self.progress = 100
         self.update(status)
 
-    def notify_download_skip(self, status="Skipped") -> None:
+    def notify_download_skip(self, status="Saltado") -> None:
         """
         Notifies the progress handler that the song has been skipped.
 
@@ -416,7 +416,7 @@ class SongTracker:
         else:
             self.progress = 50 + int(progress * 0.45)
 
-        self.update("Converting")
+        self.update("Convirtiendo")
 
     def yt_dlp_progress_hook(self, data: Dict[str, Any]) -> None:
         """
@@ -437,4 +437,4 @@ class SongTracker:
             elif file_bytes and downloaded_bytes:
                 self.progress = downloaded_bytes / file_bytes * 50
 
-            self.update("Downloading")
+            self.update("Descargando")
