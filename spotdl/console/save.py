@@ -38,7 +38,7 @@ def save(
     to_stdout = save_path == "-"
 
     if save_path is None and not to_stdout:
-        raise DownloaderError("Save file is not specified")
+        raise DownloaderError("Archivo guardado no espesificado")
 
     # Parse the query
     songs = parse_query(
@@ -53,15 +53,15 @@ def save(
         try:
             data = downloader.search(song)
             if data is None:
-                logger.error("Could not find a match for %s", song.display_name)
+                logger.error("No hay resultados para %s", song.display_name)
 
                 return None
 
-            logger.info("Found url for %s: %s", song.display_name, data)
+            logger.info("Url encontrado para %s: %s", song.display_name, data)
 
             return {**song.json, "download_url": data}
         except Exception as exception:
-            logger.error("%s generated an exception: %s", song.display_name, exception)
+            logger.error("%s exception generada: %s", song.display_name, exception)
 
         return None
 
@@ -99,7 +99,7 @@ def save(
 
     if not to_stdout:
         logger.info(
-            "Saved %s song%s to %s",
+            "Guardado: %s cancion%s en %s",
             len(save_data),
             "s" if len(save_data) > 1 else "",
             save_path,

@@ -63,16 +63,16 @@ def web(web_settings: WebOptions, downloader_settings: DownloaderOptions):
     downloader_settings["simple_tui"] = True
 
     # Download web app from GitHub
-    logger.info("Updating web app \n")
+    logger.info("Actualizando web app \n")
     web_app_dir = str(get_spotdl_path().absolute())
     download_github_dir(
-        "https://github.com/spotdl/web-ui/tree/master/dist",
+        "https://github.com/erickonlive/web-ui/tree/master/dist",
         output_dir=web_app_dir,
     )
 
     app_state.api = FastAPI(
         title="spotDL",
-        description="Download music from Spotify",
+        description="Descarga musica de Spotify",
         version=__version__,
         dependencies=[Depends(get_current_state)],
     )
@@ -115,19 +115,19 @@ def web(web_settings: WebOptions, downloader_settings: DownloaderOptions):
 
     if not web_settings["web_use_output_dir"]:
         logger.info(
-            "Files are stored in temporary directory "
-            "and will be deleted after the program exits "
-            "to save them to current directory permanently "
-            "enable the `web_use_output_dir` option "
+            "Los archivos se guardar en directorios temporales "
+            "que se borraran despues de cerrar la aplicacion "
+            "asegurate de guardarlos antes cerrar la app "
+            "o habilita la opcion `web_use_output_dir`"
         )
     else:
         logger.info(
-            "Files are stored in current directory "
-            "to save them to temporary directory "
-            "disable the `web_use_output_dir` option "
+            "Los archivos estan guardados en el directorio actual "
+            "para guardarlos en un directorio remporal "
+            "deshabilita la opcion `web_use_output_dir`"
         )
 
-    logger.info("Starting web server \n")
+    logger.info("Iniciando servidor \n")
 
     # Start the web server
     app_state.loop.run_until_complete(app_state.server.serve())

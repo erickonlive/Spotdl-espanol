@@ -71,8 +71,8 @@ def console_entry_point():
     # Check if ffmpeg is installed
     if is_ffmpeg_installed(downloader_settings["ffmpeg"]) is False:
         raise FFmpegError(
-            "FFmpeg is not installed. Please run `spotdl --download-ffmpeg` to install it, "
-            "or `spotdl --ffmpeg /path/to/ffmpeg` to specify the path to ffmpeg."
+            "FFmpeg No esta instalado "
+            "Descarguelo y peguelo en el directorio de raiz"
         )
 
     # Initialize spotify client
@@ -129,7 +129,7 @@ def console_entry_point():
     except Exception:
         downloader.progress_handler.close()
 
-        logger.exception("An error occurred")
+        logger.exception("Ocurrio un error")
 
         sys.exit(1)
 

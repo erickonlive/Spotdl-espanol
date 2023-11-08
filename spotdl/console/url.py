@@ -38,7 +38,7 @@ def url(
         try:
             data = downloader.search(song)
             if data is None:
-                logger.error("Could not find a match for %s", song.display_name)
+                logger.error("No se pudo encontrar %s", song.display_name)
 
                 return None
 
@@ -47,7 +47,7 @@ def url(
 
             print(download_url)
         except Exception as exception:
-            logger.error("%s generated an exception: %s", song.display_name, exception)
+            logger.error("%s exception generada: %s", song.display_name, exception)
 
         return None
 

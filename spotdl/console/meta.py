@@ -46,7 +46,7 @@ def meta(query: List[str], downloader: Downloader) -> None:
                 paths.extend(test_path.glob(f"*.{out_format}"))
         elif test_path.is_file():
             if test_path.suffix.split(".")[-1] not in FFMPEG_FORMATS:
-                logger.error("File is not a supported audio format: %s", path)
+                logger.error("Este archivo no es un formato de audio compatible: %s", path)
                 continue
 
             paths.append(test_path)
@@ -65,11 +65,11 @@ def meta(query: List[str], downloader: Downloader) -> None:
                 and song_meta.get("lyrics")
                 and song_meta.get("album_art")
             ):
-                logger.info("Song already has metadata: %s", file.name)
+                logger.info("Esta cancion ya tiene metadata: %s", file.name)
                 if downloader.settings["generate_lrc"]:
                     lrc_file = file.with_suffix(".lrc")
                     if lrc_file.exists():
-                        logger.info("Lrc file already exists for %s", file.name)
+                        logger.info("Ya hay un archivo de letras para %s", file.name)
                         return None
 
                     song = Song.from_missing_data(
@@ -80,9 +80,9 @@ def meta(query: List[str], downloader: Downloader) -> None:
 
                     generate_lrc(song, file)
                     if lrc_file.exists():
-                        logger.info("Saved lrc file for %s", song.display_name)
+                        logger.info("Guardado lrc para %s", song.display_name)
                     else:
-                        logger.info("Could not find lrc file for %s", song.display_name)
+                        logger.info("no se encontro lrc para %s", song.display_name)
 
                 return None
 
@@ -102,10 +102,10 @@ def meta(query: List[str], downloader: Downloader) -> None:
             # Song does not have metadata, or it is missing some fields
             # or we are forcing update of metadata
             # so we search for it
-            logger.debug("Searching metadata for %s", file.name)
+            logger.debug("Buscando metadata para %s", file.name)
             search_results = get_search_results(file.stem)
             if not search_results:
-                logger.error("Could not find metadata for %s", file.name)
+                logger.error("No se encontro metadata para %s", file.name)
                 return None
 
             song = search_results[0]
@@ -115,35 +115,35 @@ def meta(query: List[str], downloader: Downloader) -> None:
             try:
                 song = reinit_song(Song.from_missing_data(**song_meta))
             except QueryError:
-                logger.error("Could not find metadata for %s", file.name)
+                logger.error("No se encontro metadata para %s", file.name)
                 return None
 
         # Check if the song has lyric
         # if not use downloader to find lyrics
         if song_meta is None or song_meta.get("lyrics") is None:
-            logger.debug("Fetching lyrics for %s", song.display_name)
+            logger.debug("Aplicando letra para %s", song.display_name)
             song.lyrics = downloader.search_lyrics(song)
             if song.lyrics:
-                logger.info("Found lyrics for song: %s", song.display_name)
+                logger.info("Letra encontrada para: %s", song.display_name)
         else:
             song.lyrics = song_meta.get("lyrics")
 
         # Apply metadata to the song
         embed_metadata(file, song)
 
-        logger.info("Applied metadata to %s", file.name)
+        logger.info("Metadata aplicada para %s", file.name)
 
         if downloader.settings["generate_lrc"]:
             lrc_file = file.with_suffix(".lrc")
             if lrc_file.exists():
-                logger.info("Lrc file already exists for %s", file.name)
+                logger.info("El archivo Lrc ya existe para %s", file.name)
                 return None
 
             generate_lrc(song, file)
             if lrc_file.exists():
-                logger.info("Saved lrc file for %s", song.display_name)
+                logger.info("Se guardo Lrc para %s", song.display_name)
             else:
-                logger.info("Could not find lrc file for %s", song.display_name)
+                logger.info("No se encontro Lcr para %s", song.display_name)
 
         return None
 
