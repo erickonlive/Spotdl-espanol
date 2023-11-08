@@ -9,13 +9,13 @@
 
 # spotDL v4
 
-**spotDL** finds songs from Spotify playlists on YouTube and downloads them - along with album art, lyrics and metadata.
+**spotDL** Descarga musica de youtube usando data de spotify.
 
 
-[![MIT License](https://img.shields.io/github/license/spotdl/spotify-downloader?color=44CC11&style=flat-square)](https://github.com/spotDL/spotify-downloader/blob/master/LICENSE)
-[![PyPI version](https://img.shields.io/pypi/pyversions/spotDL?color=%2344CC11&style=flat-square)](https://pypi.org/project/spotdl/)
-[![PyPi downloads](https://img.shields.io/pypi/dw/spotDL?label=downloads@pypi&color=344CC11&style=flat-square)](https://pypi.org/project/spotdl/)
-![Contributors](https://img.shields.io/github/contributors/spotDL/spotify-downloader?style=flat-square)
+[![MIT License](https://img.shields.io/github/license/Erickonlive/spotify-downloader?color=44CC11&style=flat-square)](https://github.com/spotDL/spotify-downloader/blob/master/LICENSE)
+[![PyPI version](https://img.shields.io/pypi/pyversions/Erickonlive?color=%2344CC11&style=flat-square)](https://pypi.org/project/spotdl/)
+[![PyPi downloads](https://img.shields.io/pypi/dw/Erickonlive?label=downloads@pypi&color=344CC11&style=flat-square)](https://pypi.org/project/spotdl/)
+![Contributors](https://img.shields.io/github/contributors/Erickonlive/spotify-downloader?style=flat-square)
 [![Discord](https://img.shields.io/discord/771628785447337985?label=discord&logo=discord&style=flat-square)](https://discord.gg/xCa23pwJWY)
 
 > spotDL: The fastest, easiest and most accurate command-line music downloader.
@@ -37,16 +37,13 @@ Refer to our [Installation Guide](https://spotdl.rtfd.io/en/latest/installation/
   > On some systems you might have to change `pip` to `pip3`.
 
 <details>
-    <summary style="font-size:1.25em"><strong>Other options</strong></summary>
+    <summary style="font-size:1.25em"><strong>Otras opcciones</strong></summary>
 
 - Prebuilt executable
-  - You can download the latest version from the
-    [Releases Tab](https://github.com/spotDL/spotify-downloader/releases)
+  - Descarga la ultima version desde aqui
+    [Releases Tab](https://github.com/Erickonlive/spotify-downloader/releases)
 - On Termux
-  - `curl -L https://raw.githubusercontent.com/spotDL/spotify-downloader/master/scripts/termux.sh | sh`
-- Arch
-  - There is an [Arch User Repository (AUR) package](https://aur.archlinux.org/packages/python-spotdl/) for
-    spotDL.
+  - `curl -L https://raw.githubusercontent.com/erickonlive/spotify-downloader/master/scripts/termux.sh | sh`
 - Docker
   - Build image:
 
@@ -131,32 +128,19 @@ For a list of all **options** use ```spotdl -h```
 - `meta`: Updates metadata for the provided song files.
 </details>
 
-## Music Sourcing and Audio Quality
-
-spotDL uses YouTube as a source for music downloads. This method is used to avoid any issues related to downloading music from Spotify.
-
-> **Note**
-> Users are responsible for their actions and potential legal consequences. We do not support unauthorized downloading of copyrighted material and take no responsibility for user actions.
-
-### Audio Quality
-
-spotDL downloads music from YouTube and is designed to always download the highest possible bitrate; which is 128 kbps for regular users and 256 kbps for YouTube Music premium users.
 
 Check the [Audio Formats](docs/usage.md#audio-formats-and-quality) page for more info.
 
-## Contributing
 
-Interested in contributing? Check out our [CONTRIBUTING.md](docs/CONTRIBUTING.md) to find
-resources around contributing along with a guide on how to set up a development environment.
 
-## Donate
+## Dona
 
-help support the development and maintenance of the software ❤️
+Apoya al desarrollador de esta aplicación ❤️
 
 [![paypal](https://img.shields.io/badge/paypal-%2300457C.svg?&style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/kko7)
 [![kofi](https://img.shields.io/badge/kofi-%23F16061.svg?&style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/xnetcat)
 
 ## License
 
-This project is Licensed under the [MIT](/LICENSE) License.
+Proyecto licenciando bajo la [MIT](/LICENSE) License.
 
