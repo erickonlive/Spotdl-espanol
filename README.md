@@ -80,7 +80,7 @@ sigue estas instrucciones:
 
 - [Para windows](https://windowsloop.com/install-ffmpeg-windows-10/)
 - OSX - `brew install ffmpeg`
-- Linux - `sudo apt install ffmpeg` or use your distro's package manager
+- Linux - `sudo apt install ffmpeg` o utilice un gestor de paquetes correspondiente a su distribución
 
 ## Uso
 
