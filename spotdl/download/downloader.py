@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import json
 import logging
+import re
 import shutil
 import sys
 import traceback
@@ -32,6 +33,7 @@ from spotdl.types.song import Song
 from spotdl.utils.archive import Archive
 from spotdl.utils.config import (
     DOWNLOADER_OPTIONS,
+    GlobalConfig,
     create_settings_type,
     get_errors_path,
     get_temp_path,
@@ -125,7 +127,7 @@ class Downloader:
 
         # Handle deprecated values in config file
         modernize_settings(self.settings)
-        logger.debug("Downloader settings: %s", self.settings)
+        logger.debug("Opciones de descarga: %s", self.settings)
 
         # If no audio providers specified, raise an error
         if len(self.settings["audio_providers"]) == 0:
@@ -139,7 +141,7 @@ class Downloader:
         if self.ffmpeg == "ffmpeg" and shutil.which("ffmpeg") is None:
             ffmpeg_exec = get_ffmpeg_path()
             if ffmpeg_exec is None:
-                raise DownloaderError("ffmpeg No esta instalado")
+                raise DownloaderError("ffmpeg is not installed")
 
             self.ffmpeg = str(ffmpeg_exec.absolute())
 
@@ -163,11 +165,13 @@ class Downloader:
         self.scan_formats = self.settings["detect_formats"] or [self.settings["format"]]
         self.known_songs: Dict[str, List[Path]] = {}
         if self.settings["scan_for_songs"]:
-            logger.info("Buscando caciones...")
+            logger.info("Scanning for known songs, this might take a while...")
             for scan_format in self.scan_formats:
-                logger.debug("Buscando archivos %s", scan_format)
+                logger.debug("Scanning for %s files", scan_format)
 
                 found_files = gather_known_songs(self.settings["output"], scan_format)
+
+                logger.debug("Found %s %s files", len(found_files), scan_format)
 
                 for song_url, song_paths in found_files.items():
                     known_paths = self.known_songs.get(song_url)
@@ -176,7 +180,7 @@ class Downloader:
                     else:
                         self.known_songs[song_url].extend(song_paths)
 
-        logger.debug("Se encontro %s canciones", len(self.known_songs))
+        logger.debug("Found %s known songs", len(self.known_songs))
 
         # Initialize lyrics providers
         self.lyrics_providers: List[LyricsProvider] = []
@@ -207,22 +211,34 @@ class Downloader:
         # Initialize list of errors
         self.errors: List[str] = []
 
+        # Initialize proxy server
+        proxy = self.settings["proxy"]
+        proxies = None
+        if proxy:
+            if not re.match(pattern=r"(http|https)://\d{1,5}", string=proxy):
+                raise DownloaderError(f"Invalid proxy server: {proxy}")
+            proxies = {"http": proxy, "https": proxy}
+            logger.info("Setting proxy server: %s", proxy)
+
+        GlobalConfig.set_parameter("proxies", proxies)
+
         # Initialize archive
         self.url_archive = Archive()
         if self.settings["archive"]:
             self.url_archive.load(self.settings["archive"])
+
         logger.debug("Archive: %d urls", len(self.url_archive))
 
-        logger.debug("Downloader initialized")
+        logger.debug("Descarga iniciada")
 
     def download_song(self, song: Song) -> Tuple[Song, Optional[Path]]:
         """
-        Download a single song.
+        Descarga un sola canción.
 
-        ### Arguments
+        ### Argumentos
         - song: The song to download.
 
-        ### Returns
+        ### Retornos
         - tuple with the song and the path to the downloaded file if successful.
         """
 
@@ -248,7 +264,7 @@ class Downloader:
         if self.settings["fetch_albums"]:
             albums = set(song.album_id for song in songs if song.album_id is not None)
             logger.info(
-                "Fetching %d album%s", len(albums), "s" if len(albums) > 1 else ""
+                "Buscando %d album%s", len(albums), "s" if len(albums) > 1 else ""
             )
 
             songs.extend(songs_from_albums(list(albums)))
@@ -264,7 +280,7 @@ class Downloader:
 
         if self.settings["archive"]:
             songs = [song for song in songs if song.url not in self.url_archive]
-            logger.debug("Filtered %d songs with archive", len(songs))
+            logger.debug("Filtrados %d canciones con archivo", len(songs))
 
         self.progress_handler.set_song_count(len(songs))
 
@@ -285,7 +301,7 @@ class Downloader:
             ) as error_file:
                 error_file.write("\n".join(self.errors))
 
-            logger.info("Saved errors to %s", self.settings["save_errors"])
+            logger.info("Seguardaron errores de %s", self.settings["save_errors"])
 
         # Save archive
         if self.settings["archive"]:
@@ -362,9 +378,9 @@ class Downloader:
             if url:
                 return url
 
-            logger.debug("%s failed to find %s", audio_provider.name, song.display_name)
+            logger.debug("%s Fallo al encontrar %s", audio_provider.name, song.display_name)
 
-        raise LookupError(f"No results found for song: {song.display_name}")
+        raise LookupError(f"No hay resultados para: {song.display_name}")
 
     def search_lyrics(self, song: Song) -> Optional[str]:
         """
@@ -381,13 +397,13 @@ class Downloader:
             lyrics = lyrics_provider.get_lyrics(song.name, song.artists)
             if lyrics:
                 logger.debug(
-                    "Found lyrics for %s on %s", song.display_name, lyrics_provider.name
+                    "Se encontraron letras para %s en %s", song.display_name, lyrics_provider.name
                 )
 
                 return lyrics
 
             logger.debug(
-                "%s failed to find lyrics for %s",
+                "%s No se encontro letra para %s",
                 lyrics_provider.name,
                 song.display_name,
             )
@@ -440,6 +456,10 @@ class Downloader:
 
             reinitialized = True
 
+        if song.explicit is True and self.settings["skip_explicit"] is True:
+            logger.info("Omitiendo canciones explicitas: %s", song.display_name)
+            return song, None
+
         # Initalize the progress tracker
         display_progress_tracker = self.progress_handler.get_new_tracker(song)
 
@@ -468,7 +488,7 @@ class Downloader:
 
             if dup_song_paths:
                 logger.debug(
-                    "Canciones duplicadas en %s de %s",
+                    "Found duplicate songs for %s at %s",
                     song.display_name,
                     dup_song_paths,
                 )
@@ -477,9 +497,9 @@ class Downloader:
             # we can skip the download
             if file_exists and self.settings["overwrite"] == "skip":
                 logger.info(
-                    "Omitiendo %s (Ya existe el archivo) %s",
+                    "Saltando %s (El archivo ya existe) %s",
                     song.display_name,
-                    "(duplicate)" if dup_song_paths else "",
+                    "(duplicado)" if dup_song_paths else "",
                 )
 
                 display_progress_tracker.notify_download_skip()
@@ -510,7 +530,7 @@ class Downloader:
             # Don't skip if the file exists and overwrite is set to force
             if file_exists and self.settings["overwrite"] == "force":
                 logger.info(
-                    "Sobrescribiendo %s %s",
+                    "Sobreescribiendo %s %s",
                     song.display_name,
                     " (duplicate)" if dup_song_paths else "",
                 )
@@ -518,12 +538,12 @@ class Downloader:
                 # If the duplicate song path is not None, we can delete the old file
                 for dup_song_path in dup_song_paths:
                     try:
-                        logger.info("Removing duplicate file: %s", dup_song_path)
+                        logger.info("Quitando archivo duplicado: %s", dup_song_path)
 
                         dup_song_path.unlink()
                     except (PermissionError, OSError) as exc:
                         logger.debug(
-                            "Could not remove duplicate file: %s, error: %s",
+                            "No se removio el archivo duplicado: %s, error: %s",
                             dup_song_path,
                             exc,
                         )
@@ -533,7 +553,7 @@ class Downloader:
                 lyrics = self.search_lyrics(song)
                 if lyrics is None:
                     logger.debug(
-                        "No lyrics found for %s, lyrics providers: %s",
+                        "No se encontro letra para %s, letras proveidas: %s",
                         song.display_name,
                         ", ".join(
                             [lprovider.name for lprovider in self.lyrics_providers]
@@ -542,7 +562,7 @@ class Downloader:
                 else:
                     song.lyrics = lyrics
             except Exception as exc:
-                logger.debug("Could not search for lyrics: %s", exc)
+                logger.debug("No se encontro letra para: %s", exc)
 
             # If the file already exists and we want to overwrite the metadata,
             # we can skip the download
@@ -580,8 +600,8 @@ class Downloader:
                 embed_metadata(output_file=output_file, song=song)
 
                 logger.info(
-                    f"Updated metadata for {song.display_name}"
-                    f", moved to new location: {output_file}"
+                    f"Actualizando metadata para {song.display_name}"
+                    f", movido a nueva localización: {output_file}"
                     if most_recent_duplicate
                     else ""
                 )
@@ -633,7 +653,7 @@ class Downloader:
 
             if download_info is None:
                 logger.debug(
-                    "No download info found for %s, url: %s",
+                    "No se pudo descargar %s, url: %s",
                     song.display_name,
                     download_url,
                 )
@@ -719,8 +739,8 @@ class Downloader:
                     output_file.unlink()
 
                 raise FFmpegError(
-                    f"Failed to convert {song.display_name}, "
-                    f"you can find error here: {str(file_name.absolute())}"
+                    f"Fallo al  convertir {song.display_name}, "
+                    f"Puedes encontrar el error aqui: {str(file_name.absolute())}"
                 )
 
             download_info["filepath"] = str(output_file)
@@ -745,7 +765,7 @@ class Downloader:
                 # If there are sponsor segments, remove them
                 if len(chapters) > 0:
                     logger.info(
-                        "Removing %s sponsor segments for %s",
+                        "Removiendo fragmento del sponsor %s de %s",
                         len(chapters),
                         song.display_name,
                     )
@@ -768,7 +788,7 @@ class Downloader:
                 embed_metadata(output_file, song, self.settings["id3_separator"])
             except Exception as exception:
                 raise MetadataError(
-                    "Failed to embed metadata to the song"
+                    "Fallo la indexacion del la metadata"
                 ) from exception
 
             if self.settings["generate_lrc"]:
@@ -779,14 +799,14 @@ class Downloader:
             # Add the song to the known songs
             self.known_songs.get(song.url, []).append(output_file)
 
-            logger.info('Descargado "%s": %s', song.display_name, song.download_url)
+            logger.info('Descargado "%s": %s', song.display_name)
 
             return song, output_file
         except (Exception, UnicodeEncodeError) as exception:
             if isinstance(exception, UnicodeEncodeError):
                 exception_cause = exception
                 exception = DownloaderError(
-                    "You may need to add PYTHONIOENCODING=utf-8 to your environment"
+                    "Necesitas añadir PYTHONIOENCODING=utf-8 al entorno"
                 )
 
                 exception.__cause__ = exception_cause
